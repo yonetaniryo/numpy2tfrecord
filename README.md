@@ -14,7 +14,7 @@ $ pip install .
 $ pytest -v 
 ```
 
-## How to us
+## How to use
 ### Convert a collection of numpy data to tfrecord
 ```python
 import numpy as np
