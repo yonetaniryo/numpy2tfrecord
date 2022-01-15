@@ -1,6 +1,6 @@
 # numpy2tfrecord
 
-Simple helper library to convert numpy data to tfrecord, and build tensorflow dataset from the tfrecord.
+Simple helper library to convert a collection of numpy data to tfrecord, and build a tensorflow dataset from the tfrecord.
 
 ## Installation
 ```sh
@@ -14,7 +14,8 @@ $ pip install .
 $ pytest -v 
 ```
 
-## Getting Started
+## How to us
+### Convert a collection of numpy data to tfrecord
 ```python
 import numpy as np
 from numpy2tfrecord import Numpy2Tfrecord
@@ -29,5 +30,9 @@ converter.add(entry)  # add data entry
 ...
 
 converter.export_to_tfrecord("test.tfrecord")  # export to tfrecord
-dataset = converter.build_dataset_from_tfrecord("test.tfrecord")  # load tfrecord and build tf.data.Dataset
+```
+
+### Build a tensorflow dataset from tfrecord
+```python
+dataset = build_dataset_from_tfrecord("test.tfrecord")  # load tfrecord and build tf.data.Dataset
 ```
