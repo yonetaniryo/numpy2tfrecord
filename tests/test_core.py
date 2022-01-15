@@ -5,7 +5,7 @@ import pytest
 
 
 def test_add_export_build():
-    from numpy2tfrecord import Numpy2Tfrecord
+    from numpy2tfrecord import Numpy2Tfrecord, build_dataset_from_tfrecord
 
     converter = Numpy2Tfrecord()
     x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
@@ -17,7 +17,8 @@ def test_add_export_build():
     converter.add(entry)
 
     converter.export_to_tfrecord("test.tfrecord")
-    dataset = converter.build_dataset_from_tfrecord("test.tfrecord")
+
+    dataset = build_dataset_from_tfrecord("test.tfrecord")
     entry_reconstructed = next(dataset.as_numpy_iterator())
     for key in entry.keys():
         assert np.allclose(entry[key], entry_reconstructed[key])
