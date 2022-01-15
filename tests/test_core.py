@@ -5,7 +5,7 @@ import pytest
 
 
 def test_add_export_build():
-    from numpy2tfrecord.core import Numpy2Tfrecord
+    from numpy2tfrecord import Numpy2Tfrecord
 
     converter = Numpy2Tfrecord()
     x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
