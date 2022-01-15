@@ -1,3 +1,8 @@
+"""Numpy to tfrecord converter
+
+Author: Ryo Yonetani
+"""
+
 from __future__ import annotations
 
 import os
