@@ -25,8 +25,8 @@ x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
 y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
 a = 5  # int
 b = 0.3  # float
-entry = {"x": x, "y": y, "a": a, "b": b}
-converter.add(entry)  # add data entry
+sample = {"x": x, "y": y, "a": a, "b": b}
+converter.add(sample)  # add data sample
 ...
 
 converter.export_to_tfrecord("test.tfrecord")  # export to tfrecord
