@@ -78,3 +78,46 @@ for batch in dataset.as_numpy_iterator():
     x, y = batch.values()
     ...
 ```
+
+### Speeding up PyTorch data loading with `numpy2tfrecord`!
+https://gist.github.com/yonetaniryo/c1780e58b841f30150c45233d3fe6d01
+
+```python
+import os
+import time
+
+import numpy as np
+from numpy2tfrecord import Numpy2TfrecordConverter, build_dataset_from_tfrecord
+import torch
+from torchvision import datasets, transforms
+
+dataset = datasets.MNIST(".", download=True, transform=transforms.ToTensor())
+
+# convert to tfrecord
+with Numpy2TfrecordConverter("mnist.tfrecord") as converter:
+    converter.convert_batch({"x": dataset.data.numpy().astype(np.int64), 
+                        "y": dataset.targets.numpy().astype(np.int64)})
+
+torch_loader = torch.utils.data.DataLoader(dataset, batch_size=32, pin_memory=True, num_workers=os.cpu_count())
+tic = time.time()
+for e in range(5):
+    for batch in torch_loader:
+        x, y = batch
+elapsed = time.time() - tic
+print(f"elapsed time with pytorch dataloader: {elapsed:0.2f} sec for 5 epochs")
+
+tf_loader = build_dataset_from_tfrecord("mnist.tfrecord").batch(32).prefetch(1)
+tic = time.time()
+for e in range(5):
+    for batch in tf_loader.as_numpy_iterator():
+        x, y = batch.values()
+elapsed = time.time() - tic
+print(f"elapsed time with tf dataloader: {elapsed:0.2f} sec for 5 epochs")
+```
+
+⬇️
+
+```
+elapsed time with pytorch dataloader: 41.10 sec for 5 epochs
+elapsed time with tf dataloader: 17.34 sec for 5 epochs
+```
