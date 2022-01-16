@@ -22,7 +22,7 @@ You can convert samples represented in the form of a `dict` to `tf.train.Example
 import numpy as np
 from numpy2tfrecord import Numpy2TfrecordConverter
 
-with Numpy2Tfrecord("test.tfrecord") as converter:
+with Numpy2TfrecordConverter("test.tfrecord") as converter:
     x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
     y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
     a = 5  # int
@@ -33,7 +33,7 @@ with Numpy2Tfrecord("test.tfrecord") as converter:
 
 You can also convert a `list` of samples at once using `convert_list`.
 ```python
-with Numpy2Tfrecord("test.tfrecord") as converter:
+with Numpy2TfrecordConverter("test.tfrecord") as converter:
     samples = [
         {
             "x": np.random.rand(64).astype(np.float32),
@@ -47,7 +47,7 @@ with Numpy2Tfrecord("test.tfrecord") as converter:
 
 Or a batch of samples at once using `convert_batch`.
 ```python
-with Numpy2Tfrecord("test.tfrecord") as converter:
+with Numpy2TfrecordConverter("test.tfrecord") as converter:
     samples = {
         "x": np.random.rand(32, 64).astype(np.float32),
         "y": np.random.randint(0, 10, size=32).astype(np.int64),
