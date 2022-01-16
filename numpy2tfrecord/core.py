@@ -20,34 +20,34 @@ def convert_int_and_float(val):
     return val
 
 
-def get_dtypes(entry: dict) -> dict:
-    return {key: convert_int_and_float(entry[key]).dtype for key in entry.keys()}
+def get_dtypes(sample: dict) -> dict:
+    return {key: convert_int_and_float(sample[key]).dtype for key in sample.keys()}
 
 
-def get_shapes(entry: dict) -> dict:
-    return {key: convert_int_and_float(entry[key]).shape for key in entry.keys()}
+def get_shapes(sample: dict) -> dict:
+    return {key: convert_int_and_float(sample[key]).shape for key in sample.keys()}
 
 
 class Numpy2Tfrecord:
     """
     Convert a collection of numpy data to tfrecord
 
-    ```python
-    import numpy as np
-    from numpy2tfrecord import Numpy2Tfrecord
+    Example:
+        ```python
+        import numpy as np
+        from numpy2tfrecord import Numpy2Tfrecord
 
-    converter = Numpy2Tfrecord()
-    x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
-    y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
-    a = 5  # int
-    b = 0.3  # float
-    entry = {"x": x, "y": y, "a": a, "b": b}
-    converter.add(entry)  # add data entry
-    ...
+        converter = Numpy2Tfrecord()
+        x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
+        y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
+        a = 5  # int
+        b = 0.3  # float
+        sample = {"x": x, "y": y, "a": a, "b": b}
+        converter.add_sample(sample)  # add data sample
+        ...
 
-    converter.export_to_tfrecord("test.tfrecord")  # export to tfrecord
-    ```
-
+        converter.export_to_tfrecord("test.tfrecord")  # export to tfrecord
+        ```
     """
 
     def __init__(self):
@@ -55,36 +55,36 @@ class Numpy2Tfrecord:
         self.dtypes = None
         self.shapes = None
 
-    def add(self, entry: dict) -> None:
+    def add_sample(self, sample: dict) -> None:
         """
-        Add a new entry to the list
+        Add a new sample to the list
 
         Args:
-            entry (dict): new dataset entry to be parsed to tf.train.Example
+            sample (dict): new dataset sample to be parsed to tf.train.Example
         """
         if self.dtypes == None:
-            self.dtypes = get_dtypes(entry)
+            self.dtypes = get_dtypes(sample)
         if self.shapes == None:
-            self.shapes = get_shapes(entry)
+            self.shapes = get_shapes(sample)
 
         try:
-            assert entry.keys() == self.dtypes.keys()
+            assert sample.keys() == self.dtypes.keys()
         except:
-            raise (AssertionError("entry.keys() should be consistent"))
+            raise (AssertionError("sample.keys() should be consistent"))
 
         try:
-            assert self.dtypes == get_dtypes(entry)
+            assert self.dtypes == get_dtypes(sample)
         except:
             raise (AssertionError("dtype should be consistent"))
 
         try:
-            assert self.shapes == get_shapes(entry)
+            assert self.shapes == get_shapes(sample)
         except:
             raise (AssertionError("shape should be consistent"))
 
         feature = dict()
-        for key in entry.keys():
-            element = convert_int_and_float(entry[key])
+        for key in sample.keys():
+            element = convert_int_and_float(sample[key])
 
             if self.dtypes[key] == np.float32:
                 feature[key] = tf.train.Feature(
@@ -101,6 +101,28 @@ class Numpy2Tfrecord:
         example = tf.train.Example(features=tf.train.Features(feature=feature))
         self.data.append(example)
 
+    def add_list(self, samples: list[dict]) -> None:
+        """
+        Add a list of samples to the list
+
+        Args:
+            samples (list[dict]): list of samples, where each sample is a dict with the same keys and values with the same data type and shape.
+        """
+        for sample in samples:
+            self.add_sample(sample)
+
+    def add_batch(self, samples: dict) -> None:
+        """
+        Add a batch of samples to the list
+
+        Args:
+            samples (dict): a dict where the 0-th axis of all values corresponds to the batch size.
+        """
+        batch_size = next(iter(samples.values())).shape[0]
+        for b in range(batch_size):
+            sample = {key: samples[key][b] for key in samples.keys()}
+            self.add_sample(sample)
+
     def export_to_tfrecord(self, filename: str) -> None:
         """
         Export added data stored in self.data to tfrecord.
@@ -111,7 +133,7 @@ class Numpy2Tfrecord:
         Note:
             With this function, self.dypes and self.shapes are saved as filename.info.
             This info file is necessary to reconstruct the original data type and shapes
-            of each entry by a dataset created by `build_dataset_from_tfrecord`.
+            of each sample by a dataset created by `build_dataset_from_tfrecord`.
         """
         try:
             assert len(self.data) > 0
