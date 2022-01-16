@@ -56,9 +56,9 @@ with Numpy2TfrecordConverter("test.tfrecord") as converter:
     converter.convert_batch(samples)
 ```
 
-So what are the advantages of `Numpy2TfRecordConverter` compared to `tf.data.datset.from_tensor_slices`? 
+So what are the advantages of `Numpy2TfrecordConverter` compared to `tf.data.datset.from_tensor_slices`? 
 Simply put, when using `tf.data.dataset.from_tensor_slices`, all the samples that will be converted to a dataset must be in memory. 
-On the other hand, you can use `Numpy2TfRecordConverter` to sequentially add samples to the tfrecord without having to read all of them into memory beforehand..
+On the other hand, you can use `Numpy2TfrecordConverter` to sequentially add samples to the tfrecord without having to read all of them into memory beforehand..
 
 
 
