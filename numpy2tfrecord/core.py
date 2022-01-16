@@ -9,7 +9,6 @@ import os
 import pickle
 import numpy as np
 import tensorflow as tf
-from tqdm import tqdm
 
 
 def convert_int_and_float(val):
@@ -28,36 +27,42 @@ def get_shapes(sample: dict) -> dict:
     return {key: convert_int_and_float(sample[key]).shape for key in sample.keys()}
 
 
-class Numpy2Tfrecord:
+class Numpy2TfrecordConveter:
     """
-    Convert a collection of numpy data to tfrecord
+    Convert numpy data to tfrecord
 
     Example:
         ```python
         import numpy as np
-        from numpy2tfrecord import Numpy2Tfrecord
+        from numpy2tfrecord import Numpy2TfrecordConverter
 
-        converter = Numpy2Tfrecord()
-        x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
-        y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
-        a = 5  # int
-        b = 0.3  # float
-        sample = {"x": x, "y": y, "a": a, "b": b}
-        converter.add_sample(sample)  # add data sample
-        ...
-
-        converter.export_to_tfrecord("test.tfrecord")  # export to tfrecord
+        with Numpy2TfrecordConverter("test.tfrecord") as converter:
+            x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
+            y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
+            a = 5  # int
+            b = 0.3  # float
+            sample = {"x": x, "y": y, "a": a, "b": b}
+            converter.convert_sample(sample)  # add data sample
         ```
     """
 
-    def __init__(self):
-        self.data = []
+    def __init__(self, filename: str):
         self.dtypes = None
         self.shapes = None
+        self.filename = filename
 
-    def add_sample(self, sample: dict) -> None:
+    def __enter__(self) -> tf.io.TFRecordWriter:
+        self.writer = tf.io.TFRecordWriter(self.filename)
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb) -> None:
+        # save data type and shape information
+        pickle.dump([self.dtypes, self.shapes], open(f"{self.filename}.info", "wb"))
+        self.writer.close()
+
+    def convert_sample(self, sample: dict) -> None:
         """
-        Add a new sample to the list
+        Convert a new sample
 
         Args:
             sample (dict): new dataset sample to be parsed to tf.train.Example
@@ -99,21 +104,21 @@ class Numpy2Tfrecord:
                     f"dtype {self.dtypes[key]} is not currently supported"
                 )
         example = tf.train.Example(features=tf.train.Features(feature=feature))
-        self.data.append(example)
+        self.writer.write(example.SerializeToString())
 
-    def add_list(self, samples: list[dict]) -> None:
+    def convert_list(self, samples: list[dict]) -> None:
         """
-        Add a list of samples to the list
+        Convert a list of samples
 
         Args:
             samples (list[dict]): list of samples, where each sample is a dict with the same keys and values with the same data type and shape.
         """
         for sample in samples:
-            self.add_sample(sample)
+            self.convert_sample(sample)
 
-    def add_batch(self, samples: dict) -> None:
+    def convert_batch(self, samples: dict) -> None:
         """
-        Add a batch of samples to the list
+        Convert a batch of samples to the list
 
         Args:
             samples (dict): a dict where the 0-th axis of all values corresponds to the batch size.
@@ -121,30 +126,7 @@ class Numpy2Tfrecord:
         batch_size = next(iter(samples.values())).shape[0]
         for b in range(batch_size):
             sample = {key: samples[key][b] for key in samples.keys()}
-            self.add_sample(sample)
-
-    def export_to_tfrecord(self, filename: str) -> None:
-        """
-        Export added data stored in self.data to tfrecord.
-
-        Args:
-            filename (str): filename of tfrecord
-
-        Note:
-            With this function, self.dypes and self.shapes are saved as filename.info.
-            This info file is necessary to reconstruct the original data type and shapes
-            of each sample by a dataset created by `build_dataset_from_tfrecord`.
-        """
-        try:
-            assert len(self.data) > 0
-        except:
-            print("No entries are found")
-            return
-
-        with tf.io.TFRecordWriter(filename) as writer:
-            for example in tqdm(self.data):
-                writer.write(example.SerializeToString())
-        pickle.dump([self.dtypes, self.shapes], open(f"{filename}.info", "wb"))
+            self.convert_sample(sample)
 
 
 def build_dataset_from_tfrecord(filename: str) -> tf.data.Dataset:
@@ -183,5 +165,5 @@ def build_dataset_from_tfrecord(filename: str) -> tf.data.Dataset:
             sample[key] = tf.reshape(tf.sparse.to_dense(features[key]), shapes[key])
         return sample
 
-    raw_dataset = tf.data.TFRecordDataset(filename)
+    raw_dataset = tf.data.TFRecordDataset(filename, num_parallel_reads=tf.data.AUTOTUNE)
     return raw_dataset.map(parse_tfrecord)
