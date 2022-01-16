@@ -5,9 +5,9 @@ import pytest
 
 
 def test_convert_sample():
-    from numpy2tfrecord import Numpy2TfrecordConveter, build_dataset_from_tfrecord
+    from numpy2tfrecord import Numpy2TfRecordConverter, build_dataset_from_tfrecord
 
-    with Numpy2TfrecordConveter("test.tfrecord") as converter:
+    with Numpy2TfRecordConverter("test.tfrecord") as converter:
         x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
         y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
         a = 5  # int
@@ -25,9 +25,9 @@ def test_convert_sample():
 
 
 def test_convert_list():
-    from numpy2tfrecord import Numpy2TfrecordConveter, build_dataset_from_tfrecord
+    from numpy2tfrecord import Numpy2TfRecordConverter, build_dataset_from_tfrecord
 
-    with Numpy2TfrecordConveter("test.tfrecord") as converter:
+    with Numpy2TfRecordConverter("test.tfrecord") as converter:
         samples = [
             {
                 "x": np.random.rand(64).astype(np.float32),
@@ -47,9 +47,9 @@ def test_convert_list():
 
 
 def test_convert_batch():
-    from numpy2tfrecord import Numpy2TfrecordConveter, build_dataset_from_tfrecord
+    from numpy2tfrecord import Numpy2TfRecordConverter, build_dataset_from_tfrecord
 
-    with Numpy2TfrecordConveter("test.tfrecord") as converter:
+    with Numpy2TfRecordConverter("test.tfrecord") as converter:
         samples = {
             "x": np.random.rand(32, 64).astype(np.float32),
             "y": np.random.randint(0, 10, size=32).astype(np.int64),

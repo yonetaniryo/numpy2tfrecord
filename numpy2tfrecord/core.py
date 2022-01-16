@@ -27,7 +27,7 @@ def get_shapes(sample: dict) -> dict:
     return {key: convert_int_and_float(sample[key]).shape for key in sample.keys()}
 
 
-class Numpy2TfrecordConveter:
+class Numpy2TfRecordConverter:
     """
     Convert numpy data to tfrecord
 
