@@ -55,7 +55,7 @@ class Numpy2Tfrecord:
         self.dtypes = None
         self.shapes = None
 
-    def add(self, sample: dict) -> None:
+    def add_sample(self, sample: dict) -> None:
         """
         Add a new sample to the list
 
@@ -100,6 +100,28 @@ class Numpy2Tfrecord:
                 )
         example = tf.train.Example(features=tf.train.Features(feature=feature))
         self.data.append(example)
+
+    def add_list(self, samples: list[dict]) -> None:
+        """
+        Add a list of samples to the list
+
+        Args:
+            samples (list[dict]): list of samples, where each sample is a dict with the same keys and values with the same data type and shape.
+        """
+        for sample in samples:
+            self.add_sample(sample)
+
+    def add_batch(self, samples: dict) -> None:
+        """
+        Add a batch of samples to the list
+
+        Args:
+            samples (dict): a sample dictionary where the 0-th axis of all values corresponds to the batch size.
+        """
+        batch_size = next(iter(samples.values())).shape[0]
+        for b in range(batch_size):
+            sample = {key: samples[key][b] for key in samples.keys()}
+            self.add_sample(sample)
 
     def export_to_tfrecord(self, filename: str) -> None:
         """
