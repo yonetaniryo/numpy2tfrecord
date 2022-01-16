@@ -1,6 +1,6 @@
 # numpy2tfrecord
 
-Simple helper library to convert a collection of numpy data to tfrecord, and build a tensorflow dataset from the tfrecord.
+Simple helper library to convert numpy data to tfrecord and build a tensorflow dataset.
 
 ## Installation
 ```sh
@@ -8,59 +8,63 @@ $ git clone git@github.com:yonetaniryo/numpy2tfrecord.git
 $ cd numpy2tfrecord
 $ pip install .
 ```
-
-## Test
+or simply using pip:
 ```sh
-$ pytest -v 
+$ pip install git+https://github.com/yonetaniryo/numpy2tfrecord
 ```
+
 
 ## How to use
 ### Convert a collection of numpy data to tfrecord
 
-You can add samples to a dataset by representing them in the form of a `dict`, and save them as a tfrecord.
+You can convert samples represented in the form of a `dict` to `tf.train.Example` and save them as a tfrecord.
 ```python
 import numpy as np
-from numpy2tfrecord import Numpy2Tfrecord
+from numpy2tfrecord import Numpy2TfrecordConverter
 
-converter = Numpy2Tfrecord()
-x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
-y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
-a = 5  # int
-b = 0.3  # float
-sample = {"x": x, "y": y, "a": a, "b": b}
-converter.add_sample(sample)  # add data sample
-...
-
-converter.export_to_tfrecord("test.tfrecord")  # export to tfrecord
+with Numpy2Tfrecord("test.tfrecord") as converter:
+    x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
+    y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
+    a = 5  # int
+    b = 0.3  # float
+    sample = {"x": x, "y": y, "a": a, "b": b}
+    converter.convert_sample(sample)  # convert data sample
 ```
 
-You can also add a `list` of samples at once using `add_list`.
+You can also convert a `list` of samples at once using `convert_list`.
 ```python
-samples = [
-    {
-        "x": np.random.rand(64).astype(np.float32),
-        "y": np.random.randint(0, 10),
-    }
-    for _ in range(32)
-]  # list of 32 samples
+with Numpy2Tfrecord("test.tfrecord") as converter:
+    samples = [
+        {
+            "x": np.random.rand(64).astype(np.float32),
+            "y": np.random.randint(0, 10),
+        }
+        for _ in range(32)
+    ]  # list of 32 samples
 
-converter.add_list(samples)
+    converter.convert_list(samples)
 ```
 
-Or add a batch of samples at once using `add_batch`.
+Or a batch of samples at once using `convert_batch`.
 ```python
-samples = {
-    "x": np.random.rand(32, 64).astype(np.float32),
-    "y": np.random.randint(0, 10, size=32).astype(np.int64),
-}  # batch of 32 samples
+with Numpy2Tfrecord("test.tfrecord") as converter:
+    samples = {
+        "x": np.random.rand(32, 64).astype(np.float32),
+        "y": np.random.randint(0, 10, size=32).astype(np.int64),
+    }  # batch of 32 samples
 
-converter.add_batch(samples)
+    converter.convert_batch(samples)
 ```
+
+So what are the advantages of `Numpy2TfRecordConverter` compared to `tf.data.datset.from_tensor_slices`? 
+Simply put, when using `tf.data.dataset.from_tensor_slices`, all the samples that will be converted to a dataset must be in memory. 
+On the other hand, you can use `Numpy2TfRecordConverter` to sequentially add samples to the tfrecord without having to read all of them into memory beforehand..
 
 
 
 ### Build a tensorflow dataset from tfrecord
-You can buld `tf.data.Dataset` from the exported tfrecord and info files.
+Samples once stored in the tfrecord can be streamed using `tf.data.TFRecordDataset`.
+
 ```python
 from numpy2tfrecord import build_dataset_from_tfrecord
 
