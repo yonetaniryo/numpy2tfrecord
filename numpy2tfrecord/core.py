@@ -32,22 +32,22 @@ class Numpy2Tfrecord:
     """
     Convert a collection of numpy data to tfrecord
 
-    ```python
-    import numpy as np
-    from numpy2tfrecord import Numpy2Tfrecord
+    Example:
+        ```python
+        import numpy as np
+        from numpy2tfrecord import Numpy2Tfrecord
 
-    converter = Numpy2Tfrecord()
-    x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
-    y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
-    a = 5  # int
-    b = 0.3  # float
-    sample = {"x": x, "y": y, "a": a, "b": b}
-    converter.add(sample)  # add data sample
-    ...
+        converter = Numpy2Tfrecord()
+        x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
+        y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
+        a = 5  # int
+        b = 0.3  # float
+        sample = {"x": x, "y": y, "a": a, "b": b}
+        converter.add_sample(sample)  # add data sample
+        ...
 
-    converter.export_to_tfrecord("test.tfrecord")  # export to tfrecord
-    ```
-
+        converter.export_to_tfrecord("test.tfrecord")  # export to tfrecord
+        ```
     """
 
     def __init__(self):
@@ -116,7 +116,7 @@ class Numpy2Tfrecord:
         Add a batch of samples to the list
 
         Args:
-            samples (dict): a sample dictionary where the 0-th axis of all values corresponds to the batch size.
+            samples (dict): a dict where the 0-th axis of all values corresponds to the batch size.
         """
         batch_size = next(iter(samples.values())).shape[0]
         for b in range(batch_size):
