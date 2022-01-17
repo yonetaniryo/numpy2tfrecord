@@ -27,16 +27,16 @@ def get_shapes(sample: dict) -> dict:
     return {key: convert_int_and_float(sample[key]).shape for key in sample.keys()}
 
 
-class Numpy2TfrecordConverter:
+class Numpy2TFRecordConverter:
     """
     Convert numpy data to tfrecord
 
     Example:
         ```python
         import numpy as np
-        from numpy2tfrecord import Numpy2TfrecordConverter
+        from numpy2tfrecord import Numpy2TFRecordConverter
 
-        with Numpy2TfrecordConverter("test.tfrecord") as converter:
+        with Numpy2TFRecordConverter("test.tfrecord") as converter:
             x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
             y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
             a = 5  # int

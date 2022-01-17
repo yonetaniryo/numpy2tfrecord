@@ -20,9 +20,9 @@ $ pip install git+https://github.com/yonetaniryo/numpy2tfrecord
 You can convert samples represented in the form of a `dict` to `tf.train.Example` and save them as a tfrecord.
 ```python
 import numpy as np
-from numpy2tfrecord import Numpy2TfrecordConverter
+from numpy2tfrecord import Numpy2TFRecordConverter
 
-with Numpy2TfrecordConverter("test.tfrecord") as converter:
+with Numpy2TFRecordConverter("test.tfrecord") as converter:
     x = np.arange(100).reshape(10, 10).astype(np.float32)  # float array
     y = np.arange(100).reshape(10, 10).astype(np.int64)  # int array
     a = 5  # int
@@ -33,7 +33,7 @@ with Numpy2TfrecordConverter("test.tfrecord") as converter:
 
 You can also convert a `list` of samples at once using `convert_list`.
 ```python
-with Numpy2TfrecordConverter("test.tfrecord") as converter:
+with Numpy2TFRecordConverter("test.tfrecord") as converter:
     samples = [
         {
             "x": np.random.rand(64).astype(np.float32),
@@ -47,7 +47,7 @@ with Numpy2TfrecordConverter("test.tfrecord") as converter:
 
 Or a batch of samples at once using `convert_batch`.
 ```python
-with Numpy2TfrecordConverter("test.tfrecord") as converter:
+with Numpy2TFRecordConverter("test.tfrecord") as converter:
     samples = {
         "x": np.random.rand(32, 64).astype(np.float32),
         "y": np.random.randint(0, 10, size=32).astype(np.int64),
@@ -56,9 +56,9 @@ with Numpy2TfrecordConverter("test.tfrecord") as converter:
     converter.convert_batch(samples)
 ```
 
-So what are the advantages of `Numpy2TfrecordConverter` compared to `tf.data.datset.from_tensor_slices`? 
+So what are the advantages of `Numpy2TFRecordConverter` compared to `tf.data.datset.from_tensor_slices`? 
 Simply put, when using `tf.data.dataset.from_tensor_slices`, all the samples that will be converted to a dataset must be in memory. 
-On the other hand, you can use `Numpy2TfrecordConverter` to sequentially add samples to the tfrecord without having to read all of them into memory beforehand..
+On the other hand, you can use `Numpy2TFRecordConverter` to sequentially add samples to the tfrecord without having to read all of them into memory beforehand..
 
 
 
