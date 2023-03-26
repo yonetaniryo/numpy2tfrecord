@@ -10,7 +10,7 @@ $ pip install .
 ```
 or simply using pip:
 ```sh
-$ pip install git+https://github.com/yonetaniryo/numpy2tfrecord
+$ pip install numpy2tfrecord
 ```
 
 
