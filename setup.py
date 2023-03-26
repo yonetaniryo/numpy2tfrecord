@@ -15,12 +15,9 @@ setup(
     author_email="yonetani.vision@gmail.com",
     license="MIT License",
     packages=["numpy2tfrecord"],
-    install_requires=["numpy"],
-    extras_require={
-        ':sys_platform == "darwin"': [
-            "tensorflow-macos",
-            "tensorflow-metal",
-        ],
-        ':sys_platform == "linux"': ["tensorflow"],
-    },
+    install_requires=["numpy",
+                      "tensorflow;platform_system=='Windows'",
+                      "tensorflow;platform_system=='linux'", 
+                      "tensorflow-macos;platform_system=='darwin'"
+                      ],
 )
